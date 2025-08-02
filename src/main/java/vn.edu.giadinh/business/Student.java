@@ -24,7 +24,7 @@ public abstract class Student {
         double gpa = calculateGPA();
         if (gpa >= 8.0) {
             return "Giỏi";
-        } else if (gpa >= 6.5)  {
+        } else if (gpa >= 6.5) {
             return "Khá";
         } else if (gpa >= 5.0) {
             return "Trung bình";
@@ -32,7 +32,6 @@ public abstract class Student {
             return "Yếu";
         }
     }
-
 
     // các getter
     public String getId() { return id; }

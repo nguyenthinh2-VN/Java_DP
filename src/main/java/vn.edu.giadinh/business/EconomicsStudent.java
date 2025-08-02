@@ -21,6 +21,4 @@ public class EconomicsStudent extends Student {
 
     public double getMarketingScore() { return marketingScore; }
     public double getSalesScore() { return salesScore; }
-
-
 }

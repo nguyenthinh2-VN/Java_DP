@@ -6,6 +6,7 @@ module com.example.projectjavadp_k17 {
     requires java.sql;
     requires mysql.connector.j;
     requires java.desktop;
+    requires static lombok;
 
     opens com.example.projectjavadp_k17 to javafx.fxml;
     exports com.example.projectjavadp_k17;

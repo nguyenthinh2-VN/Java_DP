@@ -1,23 +1,19 @@
 package vn.edu.giadinh.presentation;
-import vn.edu.giadinh.business.Student;
-import vn.edu.giadinh.business.StudentViewItem;
-import vn.edu.giadinh.business.StudentViewModel;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 import javax.swing.JFrame;
 
-public class StudentListViewUI extends JFrame {
+public class StudentListViewUI extends JFrame implements Subscriber {
     private JTextField txtSearch;
     private JButton btnAdd;
     private JTable table;
     private DefaultTableModel model;
     private SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy");
+    private StudentViewModel viewModel;
 
     public StudentListViewUI() {
         super("Danh sách sinh viên");
@@ -41,24 +37,40 @@ public class StudentListViewUI extends JFrame {
         table = new JTable(model);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
+       
+
+       
     }
 
-
-    public void showList(StudentViewModel studentViewModel) {
+    public void setViewModel(StudentViewModel viewModel) {
+		this.viewModel = viewModel;
+		
+		//đăng ký subscriber với publisher
+		viewModel.addSubscriber(this);
+	}
+    
+    private void showList(StudentViewModel studentViewModel) {
         model.setRowCount(0);
         for (StudentViewItem item : studentViewModel.studentList) {
             Object[] row = {
-                    item.stt,
-                    item.id,
-                    item.name,
-                    item.birthDate,
-                    item.major,
-                    item.gpa,
-                    item.academicRank
+                item.stt,
+                item.id,
+                item.name,
+                item.birthDate,
+                item.major,
+                item.gpa,
+                item.academicRank
             };
             model.addRow(row);
         }
     }
 
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+		this.showList(viewModel);
+		
+	}
 
+   
 }

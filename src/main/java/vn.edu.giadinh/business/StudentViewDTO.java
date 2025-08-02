@@ -1,11 +1,12 @@
 package vn.edu.giadinh.business;
 
-public class StudentViewItem {
-    public int stt;
+import java.util.Date;
+
+public class StudentViewDTO {
     public String id;
     public String name;
-    public String birthDate;
+    public Date birthDate;
     public String major;
-    public String gpa;
+    public double gpa;
     public String academicRank;
 }
