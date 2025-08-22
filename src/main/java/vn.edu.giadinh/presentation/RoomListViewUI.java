@@ -16,7 +16,7 @@ import java.util.Map;
  * RoomListViewUI - Presentation layer class for displaying room information
  * Implements Observer pattern for UI updates and follows MVP/MVVM architecture
  */
-public class RoomListViewUI extends JFrame {
+public class RoomListViewUI extends JFrame implements Subscriber {
     // UI Components
     private JTextField searchField;
     private JButton searchButton;
@@ -274,11 +274,25 @@ public class RoomListViewUI extends JFrame {
     }
 
     /**
-     * Update the UI (Observer pattern implementation)
+     * Implementation of Subscriber interface
+     * Called when the publisher notifies of changes
      */
+    @Override
     public void update() {
-        // Refresh the current view
-        repaint();
-        revalidate();
+        // Refresh the UI when notified of changes
+        refreshRoomList();
+        hienThiThongBao("Dữ liệu đã được cập nhật!");
+    }
+
+    /**
+     * Refresh the room list display
+     */
+    private void refreshRoomList() {
+        // Clear current data
+        tableModel.setRowCount(0);
+        messageArea.setText("");
+        
+        // You can add logic here to reload data if needed
+        // For now, just clear the display to show the update occurred
     }
 }

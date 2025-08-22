@@ -7,9 +7,9 @@ import java.util.Date;
 /**
  * RoomViewModel - Presentation layer view model
  * Wraps RoomViewDTO with additional presentation-specific logic
- * Follows MVVM (Model-View-ViewModel) pattern
+ * Follows MVVM (Model-View-ViewModel) pattern and Observer pattern
  */
-public class RoomViewModel {
+public class RoomViewModel extends Publisher {
     private RoomViewDTO roomViewDTO;
 
     public RoomViewModel(RoomViewDTO roomViewDTO) {
@@ -121,5 +121,15 @@ public class RoomViewModel {
 
     public RoomViewDTO getRoomViewDTO() {
         return roomViewDTO;
+    }
+
+    /**
+     * Set new room data and notify subscribers
+     * @param roomViewDTO New room data
+     */
+    public void setRoomViewDTO(RoomViewDTO roomViewDTO) {
+        this.roomViewDTO = roomViewDTO;
+        // Notify all subscribers when data changes
+        notifySubscribers();
     }
 }
