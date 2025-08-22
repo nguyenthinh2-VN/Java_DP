@@ -13,12 +13,14 @@ public class TimKiemPhongUseCase {
         this.roomGateway = roomGateway;
     }
 
+    //Nhận vào 1 chuỗi keyword, trả về danh sách các RoomViewDTO
     public List<RoomViewDTO> execute(String keyword) {
         List<RoomDTO> persistenceDTOs = roomGateway.searchRoom(keyword);
         List<Room> businessObjects = convertToBusinessObjects(persistenceDTOs);
         return convertToViewDTOs(businessObjects);
     }
 
+    //Chuyển đổi List<RoomDTO> sang List<Room>
     private List<Room> convertToBusinessObjects(List<RoomDTO> dtos) {
         List<Room> rooms = new ArrayList<>();
         for (RoomDTO dto : dtos) {
@@ -27,6 +29,8 @@ public class TimKiemPhongUseCase {
         return rooms;
     }
 
+
+    //Chuyển đổi List<Room> sang List<RoomViewDTO> và chuyển lên tầng Presentation
     private List<RoomViewDTO> convertToViewDTOs(List<Room> rooms) {
         List<RoomViewDTO> viewDTOs = new ArrayList<>();
         for (Room room : rooms) {
