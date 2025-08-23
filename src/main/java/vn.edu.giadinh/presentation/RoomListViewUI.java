@@ -1,20 +1,16 @@
 package vn.edu.giadinh.presentation;
 
-import vn.edu.giadinh.buiness.RoomViewDTO;
-import vn.edu.giadinh.buiness.TimKiemPhongUseCase;
-import vn.edu.giadinh.buiness.TinhTongPhongUseCase;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.Map;
 
 /**
  * RoomListViewUI - Presentation layer class for displaying room information
  * Implements Observer pattern for UI updates and follows MVP/MVVM architecture
+ * Now properly depends on Controller and ViewModel instead of Use Cases directly
  */
 public class RoomListViewUI extends JFrame implements Subscriber {
     // UI Components
@@ -25,19 +21,21 @@ public class RoomListViewUI extends JFrame implements Subscriber {
     private DefaultTableModel tableModel;
     private JTextArea messageArea;
     
-    // Use Cases (Business Layer Dependencies)
-    private TimKiemPhongUseCase timKiemPhongUseCase;
-    private TinhTongPhongUseCase tinhTongPhongUseCase;
+    // Controller and ViewModel (following the architecture diagram)
+    private RoomViewController controller;
+    private RoomViewModel viewModel;
     
     // Table column names
     private static final String[] COLUMN_NAMES = {
-        "Mã Phòng", "Dãy Nhà", "Loại Phòng", "Trạng Thái"
+        "Mã Phòng", "Dãy Nhà", "Loại Phòng", "Diện Tích", "Số Bóng Đèn", "Chi Tiết", "Trạng Thái"
     };
 
-    public RoomListViewUI(TimKiemPhongUseCase timKiemPhongUseCase, 
-                         TinhTongPhongUseCase tinhTongPhongUseCase) {
-        this.timKiemPhongUseCase = timKiemPhongUseCase;
-        this.tinhTongPhongUseCase = tinhTongPhongUseCase;
+    public RoomListViewUI(RoomViewController controller, RoomViewModel viewModel) {
+        this.controller = controller;
+        this.viewModel = viewModel;
+        
+        // Subscribe to ViewModel updates (Observer pattern)
+        this.viewModel.addSubscriber(this);
         
         initializeUI();
         setupEventHandlers();
@@ -101,7 +99,7 @@ public class RoomListViewUI extends JFrame implements Subscriber {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Danh Sách Phòng"));
         
-        // Create table model and table
+        // Create table model
         tableModel = new DefaultTableModel(COLUMN_NAMES, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -109,12 +107,16 @@ public class RoomListViewUI extends JFrame implements Subscriber {
             }
         };
         
+        // Create table
         roomTable = new JTable(tableModel);
         roomTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        roomTable.getTableHeader().setBackground(new Color(70, 130, 180));
-        roomTable.getTableHeader().setForeground(Color.WHITE);
+        roomTable.setRowHeight(25);
+        roomTable.getTableHeader().setReorderingAllowed(false);
         
+        // Add table to scroll pane
         JScrollPane scrollPane = new JScrollPane(roomTable);
+        scrollPane.setPreferredSize(new Dimension(750, 300));
+        
         panel.add(scrollPane, BorderLayout.CENTER);
         
         return panel;
@@ -127,11 +129,14 @@ public class RoomListViewUI extends JFrame implements Subscriber {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Thông Báo"));
         
-        messageArea = new JTextArea(3, 0);
+        messageArea = new JTextArea(5, 50);
         messageArea.setEditable(false);
         messageArea.setBackground(new Color(245, 245, 245));
+        messageArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         
         JScrollPane scrollPane = new JScrollPane(messageArea);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        
         panel.add(scrollPane, BorderLayout.CENTER);
         
         return panel;
@@ -169,30 +174,8 @@ public class RoomListViewUI extends JFrame implements Subscriber {
     }
 
     /**
-     * Display list of rooms in the table
-     * @param roomViewModels List of RoomViewDTO to display
-     */
-    public void showList(List<RoomViewDTO> roomViewModels) {
-        // Clear existing data
-        tableModel.setRowCount(0);
-        
-        // Add new data
-        for (RoomViewDTO room : roomViewModels) {
-            Object[] rowData = {
-                room.getMaPhong(),
-                room.getDayNha(),
-                room.getType(),
-                room.getTrangThai()
-            };
-            tableModel.addRow(rowData);
-        }
-        
-        // Update message
-        hienThiThongBao("Hiển thị " + roomViewModels.size() + " phòng.");
-    }
-
-    /**
      * Handle search button click event
+     * Now uses Controller instead of Use Case directly
      * @param keyword Search keyword
      */
     public void onTimKiemButton(String keyword) {
@@ -204,17 +187,10 @@ public class RoomListViewUI extends JFrame implements Subscriber {
             
             hienThiThongBao("Đang tìm kiếm...");
             
-            // Execute search use case
-            List<RoomViewDTO> results = timKiemPhongUseCase.execute(keyword);
+            // Use Controller instead of Use Case directly (following architecture)
+            controller.timKiem(keyword);
             
-            // Display results
-            showList(results);
-            
-            if (results.isEmpty()) {
-                hienThiThongBao("Không tìm thấy phòng nào với mã phòng: " + keyword);
-            } else {
-                hienThiThongBao("Tìm thấy " + results.size() + " phòng với mã phòng: " + keyword);
-            }
+            hienThiThongBao("Tìm kiếm hoàn tất với từ khóa: " + keyword);
             
         } catch (Exception e) {
             hienThiThongBao("Lỗi khi tìm kiếm: " + e.getMessage());
@@ -223,16 +199,17 @@ public class RoomListViewUI extends JFrame implements Subscriber {
 
     /**
      * Handle statistics button click event
+     * Now uses Controller instead of Use Case directly
      */
     public void onThongKeButton() {
         try {
             hienThiThongBao("Đang tính toán thống kê...");
             
-            // Execute statistics use case
-            Map<String, Integer> statistics = tinhTongPhongUseCase.execute();
+            // Use Controller instead of Use Case directly (following architecture)
+            String statisticsResult = controller.handleThongKe();
             
             // Display statistics in a dialog
-            showStatisticsDialog(statistics);
+            showStatisticsDialog(statisticsResult);
             
             hienThiThongBao("Thống kê đã được hiển thị.");
             
@@ -243,25 +220,15 @@ public class RoomListViewUI extends JFrame implements Subscriber {
 
     /**
      * Display statistics in a dialog window
-     * @param statistics Map containing statistics data
+     * @param statisticsText Formatted statistics text
      */
-    private void showStatisticsDialog(Map<String, Integer> statistics) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("=== THỐNG KÊ PHÒNG HỌC ===\n\n");
-        
-        sb.append("Tổng số phòng: ").append(statistics.get("Tổng số phòng")).append("\n\n");
-        
-        sb.append("Phân loại theo loại phòng:\n");
-        sb.append("- Phòng Lý Thuyết: ").append(statistics.get("Phòng Lý Thuyết")).append("\n");
-        sb.append("- Phòng Máy Tính: ").append(statistics.get("Phòng Máy Tính")).append("\n");
-        sb.append("- Phòng Thí Nghiệm: ").append(statistics.get("Phòng Thí Nghiệm")).append("\n\n");
-        
-        sb.append("Phân loại theo tiêu chuẩn:\n");
-        sb.append("- Phòng đạt chuẩn: ").append(statistics.get("Phòng đạt chuẩn")).append("\n");
-        sb.append("- Phòng không đạt chuẩn: ").append(statistics.get("Phòng không đạt chuẩn")).append("\n");
-        
-        JOptionPane.showMessageDialog(this, sb.toString(), "Thống Kê Phòng Học", 
-                                    JOptionPane.INFORMATION_MESSAGE);
+    private void showStatisticsDialog(String statisticsText) {
+        JOptionPane.showMessageDialog(
+            this,
+            statisticsText,
+            "Thống Kê Phòng Học",
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
     /**
@@ -269,30 +236,49 @@ public class RoomListViewUI extends JFrame implements Subscriber {
      * @param message Message to display
      */
     public void hienThiThongBao(String message) {
-        messageArea.append("[" + java.time.LocalTime.now().toString().substring(0, 8) + "] " + message + "\n");
-        messageArea.setCaretPosition(messageArea.getDocument().getLength());
+        SwingUtilities.invokeLater(() -> {
+            String timestamp = java.time.LocalTime.now().toString().substring(0, 8);
+            messageArea.append("[" + timestamp + "] " + message + "\n");
+            messageArea.setCaretPosition(messageArea.getDocument().getLength());
+        });
     }
 
     /**
      * Implementation of Subscriber interface
-     * Called when the publisher notifies of changes
+     * Called when the ViewModel notifies of changes (Observer pattern)
      */
     @Override
     public void update() {
-        // Refresh the UI when notified of changes
-        refreshRoomList();
-        hienThiThongBao("Dữ liệu đã được cập nhật!");
+        SwingUtilities.invokeLater(() -> {
+            refreshRoomList();
+        });
     }
 
     /**
-     * Refresh the room list display
+     * Refresh the room list display from ViewModel data
      */
     private void refreshRoomList() {
-        // Clear current data
+        // Clear existing data
         tableModel.setRowCount(0);
-        messageArea.setText("");
         
-        // You can add logic here to reload data if needed
-        // For now, just clear the display to show the update occurred
+        // Get data from ViewModel (following MVVM pattern)
+        List<RoomViewItem> roomItems = viewModel.roomList;
+        
+        // Add new data to table - ViewItems already contain formatted strings
+        for (RoomViewItem item : roomItems) {
+            Object[] rowData = {
+                item.getMaPhong(),
+                item.getDayNha(),
+                item.getLoaiPhong(),      // Already formatted: "Phòng Lý Thuyết"
+                item.getDienTich(),       // Already formatted: "50.0 m²"
+                item.getSoBongDen(),      // Already formatted: "6 bóng"
+                item.getChiTietPhong(),   // Already formatted: "Máy chiếu: Có"
+                item.getTrangThai()       // Already formatted: "Đạt chuẩn"
+            };
+            tableModel.addRow(rowData);
+        }
+        
+        // Update message
+        hienThiThongBao("Hiển thị " + roomItems.size() + " phòng.");
     }
 }

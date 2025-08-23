@@ -29,4 +29,16 @@ public class PhongThiNghiem extends Room{
     public boolean hasCoBonRua() {
         return coBonRua;
     }
+
+    public String getChuyenNganh() {
+        return chuyenNganh;
+    }
+
+    public int getSucChua() {
+        return sucChua;
+    }
+
+    public boolean isCoBonRua() {
+        return coBonRua;
+    }
 }

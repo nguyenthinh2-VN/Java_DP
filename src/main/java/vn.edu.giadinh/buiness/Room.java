@@ -37,4 +37,12 @@ public abstract class Room {
     public Date getNgayHD() {
         return ngayHD;
     }
+
+    public double getDienTich() {
+        return dienTich;
+    }
+
+    public int getSoBongDen() {
+        return soBongDen;
+    }
 }

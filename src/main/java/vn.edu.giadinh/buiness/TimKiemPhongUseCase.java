@@ -36,16 +36,28 @@ public class TimKiemPhongUseCase {
         for (Room room : rooms) {
             RoomViewDTO viewDTO = new RoomViewDTO();
 
-            // Ánh xạ các thuộc tính
+            // Ánh xạ các thuộc tính chung
             viewDTO.setMaPhong(room.getMaPhong());
-            viewDTO.setDayNha(room.getDayNha()); // Giả sử Room có getter này
+            viewDTO.setDayNha(room.getDayNha());
+            viewDTO.setNgayHD(room.getNgayHD());
+            viewDTO.setDienTich(room.getDienTich());
+            viewDTO.setSoBongDen(room.getSoBongDen());
 
+            // Ánh xạ theo loại phòng và thuộc tính đặc biệt
             if (room instanceof PhongLyThuyet) {
-                viewDTO.setType("Phòng Lý Thuyết");
+                PhongLyThuyet phongLT = (PhongLyThuyet) room;
+                viewDTO.setType("LT");
+                viewDTO.setMayChieu(phongLT.isMayChieu());
             } else if (room instanceof PhongMayTinh) {
-                viewDTO.setType("Phòng Máy Tính");
+                PhongMayTinh phongMT = (PhongMayTinh) room;
+                viewDTO.setType("MT");
+                viewDTO.setSoMayTinh(phongMT.getSoMayTinh());
             } else if (room instanceof PhongThiNghiem) {
-                viewDTO.setType("Phòng Thí Nghiệm");
+                PhongThiNghiem phongTN = (PhongThiNghiem) room;
+                viewDTO.setType("TN");
+                viewDTO.setChuyenNganh(phongTN.getChuyenNganh());
+                viewDTO.setSucChua(phongTN.getSucChua());
+                viewDTO.setCoBonRua(phongTN.isCoBonRua());
             }
 
             viewDTO.setTrangThai(room.datChuan() ? "Đạt chuẩn" : "Không đạt chuẩn");

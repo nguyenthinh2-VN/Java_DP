@@ -22,7 +22,7 @@ public class PhongLyThuyet extends Room {
     }
 
     // Getter riêng
-    public boolean hasMayChieu() {
+    public boolean isMayChieu() {
         return mayChieu;
     }
 }
